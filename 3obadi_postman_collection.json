@@ -1,0 +1,661 @@
+{
+  "info": {
+    "name": "3obadi Rewards Platform API",
+    "description": "Complete API collection for the 3obadi loyalty rewards and mobile recharge platform",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "3obadi-api"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "test_mobile",
+      "value": "963933333333",
+      "type": "string"
+    },
+    {
+      "key": "test_password",
+      "value": "Test@123456",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Signup - Syriatel User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.user_id) {",
+                  "        pm.environment.set('user_id', jsonData.user_id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User Syriatel\",\n  \"mobile\": \"963933333333\",\n  \"password\": \"Test@123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/signup",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "signup"]
+            },
+            "description": "Register a new Syriatel user. Mobile numbers starting with 9639[3,8,9] are detected as Syriatel."
+          },
+          "response": []
+        },
+        {
+          "name": "Signup - MTN User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User MTN\",\n  \"mobile\": \"963944444444\",\n  \"password\": \"Test@123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/signup",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "signup"]
+            },
+            "description": "Register a new MTN user. Mobile numbers NOT starting with 9639[3,8,9] are detected as MTN."
+          },
+          "response": []
+        },
+        {
+          "name": "Signup - Short Format (09...)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User Short Format\",\n  \"mobile\": \"0933333333\",\n  \"password\": \"Test@123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/signup",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "signup"]
+            },
+            "description": "Test mobile number normalization. 09XXXXXXXX will be converted to 9639XXXXXXXX automatically."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.token) {",
+                  "        pm.collectionVariables.set('jwt_token', jsonData.token);",
+                  "        pm.environment.set('jwt_token', jsonData.token);",
+                  "        console.log('JWT Token saved:', jsonData.token);",
+                  "    }",
+                  "    if (jsonData.user && jsonData.user.user_id) {",
+                  "        pm.environment.set('user_id', jsonData.user.user_id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile\": \"{{test_mobile}}\",\n  \"password\": \"{{test_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "description": "Login with mobile and password. Returns user object and JWT token."
+          },
+          "response": []
+        },
+        {
+          "name": "Request Password Reset",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile\": \"{{test_mobile}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/password/request/reset",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "password", "request", "reset"]
+            },
+            "description": "Request password reset code. A 6-digit code will be sent via SMS. Has 15-minute cooldown."
+          },
+          "response": []
+        },
+        {
+          "name": "Reset Password with Code",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile\": \"{{test_mobile}}\",\n  \"code\": \"123456\",\n  \"newPassword\": \"NewPassword@123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/password/reset",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "password", "reset"]
+            },
+            "description": "Reset password using the 6-digit code received via SMS."
+          },
+          "response": []
+        }
+      ],
+      "description": "Authentication endpoints for signup, login, and password management"
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Delete Account (Soft Delete)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"{{test_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/account",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "account"]
+            },
+            "description": "Soft delete user account. Requires password confirmation. Account can be restored by re-registering with the same mobile number."
+          },
+          "response": []
+        }
+      ],
+      "description": "User management endpoints"
+    },
+    {
+      "name": "Barcodes",
+      "item": [
+        {
+          "name": "Consume Barcode (Scan)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"BARCODE-UUID-HERE\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/barcodes/consume",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "barcodes", "consume"]
+            },
+            "description": "Scan and consume a barcode. If winner=true, awards points/discount/physical prize. Returns agent branding and award details."
+          },
+          "response": []
+        },
+        {
+          "name": "Redeem Barcode by Phone Number",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile\": \"963933333333\",\n  \"code\": \"BARCODE-UUID-HERE\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/barcodes/redeem-by-phone-number",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "barcodes", "redeem-by-phone-number"]
+            },
+            "description": "Redeem a barcode prize by providing a phone number. Sets is_redeemed=true and stores the receiver's phone number."
+          },
+          "response": []
+        },
+        {
+          "name": "Redeem Barcode Immediately",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"BARCODE-UUID-HERE\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/barcodes/redeem-now",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "barcodes", "redeem-now"]
+            },
+            "description": "Immediate redemption of barcode prize without phone number. Sets is_redeemed=true and immideate_redeem=true."
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Scanned Barcodes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/barcodes",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "barcodes"]
+            },
+            "description": "Fetch all barcodes scanned by the authenticated user. Returns barcode history with award details and agent branding."
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Barcodes (ADMIN ONLY)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"count\": 100,\n  \"agent_id\": 1,\n  \"award_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/barcodes/generate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "barcodes", "generate"]
+            },
+            "description": "Generate barcodes in bulk. ADMIN ROLE REQUIRED. Creates UUIDs and exports them to an XLSX file. Returns filename."
+          },
+          "response": []
+        }
+      ],
+      "description": "Barcode scanning, consumption, and redemption endpoints"
+    },
+    {
+      "name": "Transitions (Mobile Recharge)",
+      "item": [
+        {
+          "name": "Start Recharge - Syriatel",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 500,\n  \"location\": \"33.4933377,36.2977893\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/transitions/start",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "transitions", "start"]
+            },
+            "description": "Start mobile recharge for Syriatel user. Deducts points and recharges mobile via Syriatel API. Amount must exist in amount_types table."
+          },
+          "response": []
+        },
+        {
+          "name": "Start Recharge - MTN",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 500\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/transitions/start",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "transitions", "start"]
+            },
+            "description": "Start mobile recharge for MTN user. Deducts points and recharges mobile via MTN API. Location not required for MTN."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Transition History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/transitions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "transitions"]
+            },
+            "description": "Get user's previous transition/recharge history with status (success, accepted)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Points Balance",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/transitions/points",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "transitions", "points"]
+            },
+            "description": "Get authenticated user's current points balance."
+          },
+          "response": []
+        }
+      ],
+      "description": "Mobile recharge and points management endpoints"
+    },
+    {
+      "name": "Testing Workflows",
+      "item": [
+        {
+          "name": "Complete User Flow",
+          "item": [
+            {
+              "name": "1. Signup",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('User created successfully', function() {",
+                      "    pm.response.to.have.status(201);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Workflow Test User\",\n  \"mobile\": \"963955555555\",\n  \"password\": \"Test@123456\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/auth/signup",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "auth", "signup"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "2. Login",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Login successful', function() {",
+                      "    pm.response.to.have.status(200);",
+                      "    var jsonData = pm.response.json();",
+                      "    pm.expect(jsonData.token).to.exist;",
+                      "    pm.collectionVariables.set('jwt_token', jsonData.token);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"mobile\": \"963955555555\",\n  \"password\": \"Test@123456\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/auth/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "auth", "login"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "3. Check Points",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/transitions/points",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "transitions", "points"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "4. Scan Barcode",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt_token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"REPLACE-WITH-VALID-BARCODE-UUID\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/barcodes/consume",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "barcodes", "consume"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "5. View My Barcodes",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/barcodes",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "barcodes"]
+                }
+              },
+              "response": []
+            }
+          ],
+          "description": "Complete user journey from signup to barcode scanning"
+        }
+      ],
+      "description": "Pre-configured test workflows"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto-refresh token if expired",
+          "// Add any pre-request logic here"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global test scripts",
+          "pm.test('Response time is less than 5000ms', function() {",
+          "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});"
+        ]
+      }
+    }
+  ]
+}
+
+
+
