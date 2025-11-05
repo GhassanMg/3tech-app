@@ -18,6 +18,7 @@ import { AgentsModule } from "./agents/agents.module";
 import { AgentsEntity } from "./agents/entities/agents.entity";
 import { LoggerMiddleware } from "./utils/logger/logger.middleware";
 import { CacheModule } from "@nestjs/cache-manager";
+import { MtnModule } from "./mtn/mtn.module";
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { CacheModule } from "@nestjs/cache-manager";
     BarcodesModule,
     TransitionsModule,
     AgentsModule,
+    MtnModule,
   ],
   controllers: [AppController],
 })
