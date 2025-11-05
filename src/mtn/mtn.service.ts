@@ -18,8 +18,16 @@ export class MtnService {
         DistributorCode: '270193784',
       };
 
+      // Convert inputObj to JSON string and create URLSearchParams
+      const params = new URLSearchParams();
+      params.append('inputObj', JSON.stringify(inputObj));
+
       const response = await firstValueFrom(
-        this.httpService.post(this.MTN_API_URL, { inputObj }),
+        this.httpService.post(this.MTN_API_URL, params.toString(), {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        }),
       );
 
       return {
